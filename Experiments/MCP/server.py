@@ -1,13 +1,13 @@
-from mcp.server.fastmcp import FastMCP
+from mcp.server import MCPServer
 
-mcp = FastMCP("My Tools")
+mcp = MCPServer("My Tools")
 
 @mcp.tool()
 def add_number(a: int, b: int) -> int:
     return a + b
 
 @mcp.tool()
-def get_wheather(city: str) -> str:
+def get_weather(city: str) -> str:
     return "It's raining in " + city
 
 if __name__ == "__main__":
