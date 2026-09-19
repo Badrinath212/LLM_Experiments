@@ -9,6 +9,7 @@ dependencies = [
     "fastmcp>=4.0.3",
     "langchain-google-genai>=4.4.0",
     "langchain-openai>=1.6.2",
+    "langgraph>=1.2.11",
     "mcp>=2.2.0",
     "openai>=2.53.0",
     "sentence-transformers>=5.7.0",
