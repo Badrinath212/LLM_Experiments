@@ -59,25 +59,28 @@ async def main():
             async def call_mcp_tool(state: AgentState):
                 last_message = state["messages"][-1]
 
-                tool_call = last_message.tool_calls[0]
+                tool_messages = []
 
-                tool_name = tool_call["name"]
-                arguments = tool_call["args"]
+                for tool_call in last_message.tool_calls:
+                    tool_name = tool_call["name"]
+                    arguments = tool_call["args"]
 
-                tool_result = await session.call_tool(
-                    tool_name,
-                    arguments=arguments
-                )
+                    tool_result = await session.call_tool(
+                        tool_name,
+                        arguments=arguments
+                    )
 
-                print("MCP Tool Result:", tool_result)
+                    print("MCP Tool Result:", tool_result)
 
-                tool_message = ToolMessage(
-                    content=str(tool_result.structured_content),
-                    tool_call_id=tool_call["id"]
-                )
+                    tool_message = ToolMessage(
+                        content=str(tool_result.structured_content),
+                        tool_call_id=tool_call["id"]
+                    )
+
+                    tool_messages.append(tool_message)
 
                 return {
-                    "messages": state["messages"] + [tool_message]
+                    "messages": state["messages"] + tool_messages
                 }
 
             # Discover available tools
@@ -110,13 +113,13 @@ async def main():
                     "exit": END
                 }
             )
-            graph.add_edge("call_mcp_tool", END)
+            graph.add_edge("call_mcp_tool", "call_llm")
 
             app = graph.compile()
 
             result = await app.ainvoke({
                 "messages": [
-                    {"role": "user", "content": "what is 100+150?"}
+                    {"role": "user", "content": "what is the weather of bangalore? & what is the weather of hyderabad?"}
                 ]
             })
 
