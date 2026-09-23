@@ -62,21 +62,35 @@ async def main():
                 tool_messages = []
 
                 for tool_call in last_message.tool_calls:
-                    tool_name = tool_call["name"]
-                    arguments = tool_call["args"]
+                    for attempt in range(3):
+                        try:
+                            tool_name = tool_call["name"]
+                            arguments = tool_call["args"]
 
-                    tool_result = await session.call_tool(
-                        tool_name,
-                        arguments=arguments
-                    )
+                            tool_result = await session.call_tool(
+                                tool_name,
+                                arguments=arguments
+                            )
 
-                    print("MCP Tool Result:", tool_result)
+                            if tool_result.is_error:
+                                raise Exception(tool_result.error)
 
-                    tool_message = ToolMessage(
-                        content=str(tool_result.structured_content),
-                        tool_call_id=tool_call["id"]
-                    )
+                            print("MCP Tool Result:", tool_result)
 
+                            tool_message = ToolMessage(
+                                content=str(tool_result.structured_content),
+                                tool_call_id=tool_call["id"]
+                            )
+
+                            break
+                        except Exception as e:
+                            print(f"Error calling tool {tool_name}: {e}")
+                            print("Retrying...")
+                            if attempt == 2:
+                                tool_message = ToolMessage(
+                                    content="Error calling tool",
+                                    tool_call_id=tool_call["id"]
+                                )
                     tool_messages.append(tool_message)
 
                 return {
